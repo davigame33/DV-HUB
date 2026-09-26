@@ -1,10 +1,16 @@
 --// DV HUB
 --// LocalScript dentro de StarterGui
 
--- Executa o loadstring automaticamente de forma segura
+-- Executa os loadstrings automaticamente de forma segura
 task.spawn(function()
 	pcall(function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/Visual-/2aaa10c8b028e5b0f407e1dd2a3d5b85c41b5bf5/Visual"))()
+	end)
+end)
+
+task.spawn(function()
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/e89684021f226838affc7ab6b8fb6c8703107615/saci"))()
 	end)
 end)
 
@@ -574,5 +580,3 @@ openButton.MouseButton1Up:Connect(function()
 end)
 
 print("DV HUB carregado com sucesso!")
-
-
