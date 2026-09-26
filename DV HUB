@@ -1,0 +1,569 @@
+--// DV HUB
+--// LocalScript dentro de StarterGui
+
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local camera = workspace.CurrentCamera
+
+--==================================================
+-- CONFIGURAÇÕES
+--==================================================
+
+local IMAGE_ID = "rbxassetid://94466092478338"
+
+local RED = Color3.fromRGB(210, 25, 35)
+local DARK = Color3.fromRGB(24, 24, 27)
+local DARK2 = Color3.fromRGB(34, 34, 38)
+local DARK3 = Color3.fromRGB(45, 45, 50)
+local WHITE = Color3.fromRGB(245, 245, 245)
+
+--==================================================
+-- GUI (Com proteção contra reset)
+--==================================================
+
+local gui
+local function createGui()
+	if player.PlayerGui:FindFirstChild("DV_HUB") then
+		player.PlayerGui.DV_HUB:Destroy()
+	end
+
+	gui = Instance.new("ScreenGui")
+	gui.Name = "DV_HUB"
+	gui.ResetOnSpawn = false
+	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+	gui.Parent = player:WaitForChild("PlayerGui")
+end
+
+createGui()
+
+player.CharacterAdded:Connect(function(newChar)
+	task.wait(0.2)
+	if not player.PlayerGui:FindFirstChild("DV_HUB") then
+		createGui()
+	end
+end)
+
+--==================================================
+-- BOTÃO DV HUB (Ícone flutuante)
+--==================================================
+
+local openButton = Instance.new("ImageButton")
+openButton.Name = "DVHubButton"
+openButton.Size = UDim2.new(0, 50, 0, 50)
+openButton.Position = UDim2.new(0, 15, 0.5, -25)
+openButton.BackgroundColor3 = DARK
+openButton.BorderSizePixel = 0
+openButton.Image = IMAGE_ID
+openButton.ScaleType = Enum.ScaleType.Fit
+openButton.AutoButtonColor = false
+openButton.Parent = gui
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(1, 0)
+buttonCorner.Parent = openButton
+
+local buttonStroke = Instance.new("UIStroke")
+buttonStroke.Color = RED
+buttonStroke.Thickness = 2.5
+buttonStroke.Parent = openButton
+
+local buttonScale = Instance.new("UIScale")
+buttonScale.Scale = 1
+buttonScale.Parent = openButton
+
+--==================================================
+-- FRAME PRINCIPAL
+--==================================================
+
+local main = Instance.new("Frame")
+main.Name = "Main"
+main.Size = UDim2.new(0, 430, 0, 280)
+main.Position = UDim2.new(0.5, -215, 0.5, -140)
+main.BackgroundColor3 = DARK
+main.BorderSizePixel = 0
+main.Visible = false
+main.ClipsDescendants = true
+main.Parent = gui
+
+local mainCorner = Instance.new("UICorner")
+mainCorner.CornerRadius = UDim.new(0, 18)
+mainCorner.Parent = main
+
+local mainStroke = Instance.new("UIStroke")
+mainStroke.Color = RED
+mainStroke.Thickness = 2
+mainStroke.Parent = main
+
+local mainScale = Instance.new("UIScale")
+mainScale.Scale = 0.75
+mainScale.Parent = main
+
+--==================================================
+-- BARRA SUPERIOR
+--==================================================
+
+local top = Instance.new("Frame")
+top.Name = "TopBar"
+top.Size = UDim2.new(1, 0, 0, 80)
+top.BackgroundColor3 = DARK2
+top.BorderSizePixel = 0
+top.Parent = main
+
+local topCorner = Instance.new("UICorner")
+topCorner.CornerRadius = UDim.new(0, 18)
+topCorner.Parent = top
+
+-- Avatar
+local avatar = Instance.new("ImageLabel")
+avatar.Name = "Avatar"
+avatar.Size = UDim2.new(0, 52, 0, 52)
+avatar.Position = UDim2.new(0, 15, 0, 14)
+avatar.BackgroundColor3 = DARK
+avatar.BorderSizePixel = 0
+avatar.Parent = top
+
+local avatarCorner = Instance.new("UICorner")
+avatarCorner.CornerRadius = UDim.new(1, 0)
+avatarCorner.Parent = avatar
+
+local avatarStroke = Instance.new("UIStroke")
+avatarStroke.Color = RED
+avatarStroke.Thickness = 2.5
+avatarStroke.Parent = avatar
+
+local success, image = pcall(function()
+	return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
+end)
+if success then avatar.Image = image end
+
+-- Título
+local title = Instance.new("TextLabel")
+title.Name = "Title"
+title.Size = UDim2.new(0, 250, 0, 30)
+title.Position = UDim2.new(0, 80, 0, 14)
+title.BackgroundTransparency = 1
+title.Text = "DV HUB"
+title.TextColor3 = WHITE
+title.TextSize = 24
+title.Font = Enum.Font.GothamBold
+title.TextXAlignment = Enum.TextXAlignment.Left
+title.Parent = top
+
+-- Nome do Jogador
+local playerName = Instance.new("TextLabel")
+playerName.Name = "PlayerName"
+playerName.Size = UDim2.new(0, 250, 0, 20)
+playerName.Position = UDim2.new(0, 80, 0, 44)
+playerName.BackgroundTransparency = 1
+playerName.Text = player.DisplayName
+playerName.TextColor3 = Color3.fromRGB(180, 180, 185)
+playerName.TextSize = 14
+playerName.Font = Enum.Font.GothamMedium
+playerName.TextXAlignment = Enum.TextXAlignment.Left
+playerName.Parent = top
+
+--==================================================
+-- ÁREA INTERNA (ScrollingFrame Principal)
+--==================================================
+
+local content = Instance.new("ScrollingFrame")
+content.Name = "Content"
+content.Size = UDim2.new(1, -30, 1, -100)
+content.Position = UDim2.new(0, 15, 0, 90)
+content.BackgroundTransparency = 1
+content.BorderSizePixel = 0
+content.CanvasSize = UDim2.new(0, 0, 0, 200)
+content.ScrollBarThickness = 4
+content.Parent = main
+
+local uiList = Instance.new("UIListLayout")
+uiList.SortOrder = Enum.SortOrder.LayoutOrder
+uiList.Padding = UDim.new(0, 10)
+uiList.Parent = content
+
+--==================================================
+-- FUNÇÕES DE CRIAÇÃO DA UI
+--==================================================
+
+local function createToggleRow(name, layoutOrder, callback)
+	local row = Instance.new("Frame")
+	row.Name = name .. "Row"
+	row.Size = UDim2.new(1, 0, 0, 44)
+	row.BackgroundColor3 = DARK2
+	row.BorderSizePixel = 0
+	row.LayoutOrder = layoutOrder
+	row.Parent = content
+
+	local rCorner = Instance.new("UICorner")
+	rCorner.CornerRadius = UDim.new(0, 10)
+	rCorner.Parent = row
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -70, 1, 0)
+	label.Position = UDim2.new(0, 15, 0, 0)
+	label.BackgroundTransparency = 1
+	label.Text = name
+	label.TextColor3 = WHITE
+	label.TextSize = 14
+	label.Font = Enum.Font.GothamBold
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = row
+
+	local switchBg = Instance.new("Frame")
+	switchBg.Size = UDim2.new(0, 46, 0, 24)
+	switchBg.Position = UDim2.new(1, -61, 0.5, -12)
+	switchBg.BackgroundColor3 = DARK3
+	switchBg.BorderSizePixel = 0
+	switchBg.Parent = row
+
+	local bgCorner = Instance.new("UICorner")
+	bgCorner.CornerRadius = UDim.new(1, 0)
+	bgCorner.Parent = switchBg
+
+	local knob = Instance.new("Frame")
+	knob.Size = UDim2.new(0, 18, 0, 18)
+	knob.Position = UDim2.new(0, 3, 0.5, -9)
+	knob.BackgroundColor3 = WHITE
+	knob.BorderSizePixel = 0
+	knob.Parent = switchBg
+
+	local knobCorner = Instance.new("UICorner")
+	knobCorner.CornerRadius = UDim.new(1, 0)
+	knobCorner.Parent = knob
+
+	local enabled = false
+
+	local clickButton = Instance.new("TextButton")
+	clickButton.Size = UDim2.new(1, 0, 1, 0)
+	clickButton.BackgroundTransparency = 1
+	clickButton.Text = ""
+	clickButton.Parent = row
+
+	local function setState(newState)
+		enabled = newState
+		if enabled then
+			TweenService:Create(switchBg, TweenInfo.new(0.2), {BackgroundColor3 = RED}):Play()
+			TweenService:Create(knob, TweenInfo.new(0.2), {Position = UDim2.new(1, -21, 0.5, -9)}):Play()
+		else
+			TweenService:Create(switchBg, TweenInfo.new(0.2), {BackgroundColor3 = DARK3}):Play()
+			TweenService:Create(knob, TweenInfo.new(0.2), {Position = UDim2.new(0, 3, 0.5, -9)}):Play()
+		end
+		callback(enabled)
+	end
+
+	clickButton.MouseButton1Click:Connect(function()
+		setState(not enabled)
+	end)
+
+	return row
+end
+
+local function createSlider(name, min, max, initial, layoutOrder, callback)
+	local row = Instance.new("Frame")
+	row.Name = name .. "Slider"
+	row.Size = UDim2.new(1, 0, 0, 60)
+	row.BackgroundColor3 = DARK2
+	row.BorderSizePixel = 0
+	row.LayoutOrder = layoutOrder
+	row.Visible = false
+	row.Parent = content
+
+	local rCorner = Instance.new("UICorner")
+	rCorner.CornerRadius = UDim.new(0, 10)
+	rCorner.Parent = row
+
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1, -20, 0, 25)
+	label.Position = UDim2.new(0, 15, 0, 5)
+	label.BackgroundTransparency = 1
+	label.Text = name .. ": " .. initial
+	label.TextColor3 = WHITE
+	label.TextSize = 14
+	label.Font = Enum.Font.GothamBold
+	label.TextXAlignment = Enum.TextXAlignment.Left
+	label.Parent = row
+
+	local barBg = Instance.new("Frame")
+	barBg.Size = UDim2.new(1, -30, 0, 8)
+	barBg.Position = UDim2.new(0, 15, 0, 38)
+	barBg.BackgroundColor3 = DARK3
+	barBg.BorderSizePixel = 0
+	barBg.Parent = row
+
+	local barCorner = Instance.new("UICorner")
+	barCorner.CornerRadius = UDim.new(1, 0)
+	barCorner.Parent = barBg
+
+	local fill = Instance.new("Frame")
+	fill.Size = UDim2.new((initial - min)/(max - min), 0, 1, 0)
+	fill.BackgroundColor3 = RED
+	fill.BorderSizePixel = 0
+	fill.Parent = barBg
+
+	local fillCorner = Instance.new("UICorner")
+	fillCorner.CornerRadius = UDim.new(1, 0)
+	fillCorner.Parent = fill
+
+	local dragging = false
+
+	local function updateSlider(input)
+		local pos = math.clamp((input.Position.X - barBg.AbsolutePosition.X) / barBg.AbsoluteSize.X, 0, 1)
+		local val = math.floor(min + (max - min) * pos)
+		fill.Size = UDim2.new(pos, 0, 1, 0)
+		label.Text = name .. ": " .. val
+		callback(val)
+	end
+
+	barBg.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			updateSlider(input)
+		end
+	end)
+
+	UserInputService.InputEnded:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = false
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+			updateSlider(input)
+		end
+	end)
+
+	return row
+end
+
+--==================================================
+-- VARIÁVEIS DE CONTROLE
+--==================================================
+
+local linhaEnabled = false
+local hologramEnabled = false
+local giraEnabled = false
+local giraSpeed = 50
+
+local tracer = nil
+pcall(function()
+	tracer = Drawing.new("Line")
+	tracer.Visible = false
+	tracer.Color = RED
+	tracer.Thickness = 3
+	tracer.Transparency = 1
+end)
+
+local function getClosestPlayerHead()
+	local closestHead = nil
+	local shortestDistance = math.huge
+	local viewportCenter = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+
+	for _, otherPlayer in ipairs(Players:GetPlayers()) do
+		local isTeamMate = (player.Team and otherPlayer.Team and player.Team == otherPlayer.Team)
+		if otherPlayer ~= player and not isTeamMate and otherPlayer.Character and otherPlayer.Character:FindFirstChild("Head") and otherPlayer.Character:FindFirstChild("Humanoid") and otherPlayer.Character.Humanoid.Health > 0 then
+			local head = otherPlayer.Character.Head
+			local direction = (head.Position - camera.CFrame.Position).Unit
+			local dot = camera.CFrame.LookVector:Dot(direction)
+			
+			if dot > 0.3 then
+				local screenPos, onScreen = camera:WorldToViewportPoint(head.Position)
+				if onScreen then
+					local pos2D = Vector2.new(screenPos.X, screenPos.Y)
+					local dist = (pos2D - viewportCenter).Magnitude
+					if dist < shortestDistance then
+						shortestDistance = dist
+						closestHead = head
+					end
+				end
+			end
+		end
+	end
+	return closestHead
+end
+
+--==================================================
+-- CONSTRUÇÃO DO MENU PRINCIPAL
+--==================================================
+
+createToggleRow("Linha Bot", 1, function(state)
+	linhaEnabled = state
+	if not linhaEnabled and tracer then tracer.Visible = false end
+end)
+
+createToggleRow("Holograma RGB", 2, function(state)
+	hologramEnabled = state
+	if not hologramEnabled then
+		for _, otherPlayer in ipairs(Players:GetPlayers()) do
+			if otherPlayer.Character then
+				local hl = otherPlayer.Character:FindFirstChild("DV_HologramHighlight")
+				if hl then hl:Destroy() end
+			end
+		end
+	end
+end)
+
+local sliderRow = createSlider("Velocidade Gira", 10, 350, 50, 4, function(val)
+	giraSpeed = val
+end)
+
+createToggleRow("Gira", 3, function(state)
+	giraEnabled = state
+	sliderRow.Visible = state
+end)
+
+--==================================================
+-- LOOP PRINCIPAL (RenderStepped)
+--==================================================
+
+RunService.RenderStepped:Connect(function(dt)
+	local head = getClosestPlayerHead()
+
+	-- Linha Bot
+	if linhaEnabled then
+		if head then
+			local screenPos, onScreen = camera:WorldToViewportPoint(head.Position)
+			if onScreen and tracer then
+				tracer.From = Vector2.new(camera.ViewportSize.X / 2, camera.ViewportSize.Y / 2)
+				tracer.To = Vector2.new(screenPos.X, screenPos.Y)
+				tracer.Visible = true
+			elseif tracer then
+				tracer.Visible = false
+			end
+			camera.CFrame = CFrame.new(camera.CFrame.Position, head.Position)
+		else
+			if tracer then tracer.Visible = false end
+		end
+
+		local char = player.Character
+		if char then
+			local tool = char:FindFirstChildOfClass("Tool")
+			if tool then
+				pcall(function() tool:Activate() end)
+			end
+		end
+	else
+		if tracer then tracer.Visible = false end
+	end
+
+	-- Holograma RGB
+	if hologramEnabled then
+		local hue = (tick() % 4) / 4
+		local rgbColor = Color3.fromHSV(hue, 1, 1)
+
+		for _, otherPlayer in ipairs(Players:GetPlayers()) do
+			if otherPlayer ~= player then
+				local isTeamMate = (player.Team and otherPlayer.Team and player.Team == otherPlayer.Team)
+				local char = otherPlayer.Character
+				
+				if not isTeamMate and char and char:FindFirstChild("Humanoid") and char.Humanoid.Health > 0 then
+					local highlight = char:FindFirstChild("DV_HologramHighlight")
+					if not highlight then
+						highlight = Instance.new("Highlight")
+						highlight.Name = "DV_HologramHighlight"
+						highlight.Adornee = char
+						highlight.FillTransparency = 0.3
+						highlight.OutlineTransparency = 0
+						highlight.Parent = char
+					end
+					highlight.FillColor = rgbColor
+					highlight.OutlineColor = Color3.fromRGB(255, 255, 255)
+				else
+					if char then
+						local highlight = char:FindFirstChild("DV_HologramHighlight")
+						if highlight then highlight:Destroy() end
+					end
+				end
+			end
+		end
+	end
+
+	-- Gira
+	if giraEnabled then
+		local char = player.Character
+		if char and char:FindFirstChild("HumanoidRootPart") then
+			local hrp = char.HumanoidRootPart
+			hrp.CFrame = hrp.CFrame * CFrame.Angles(0, math.rad(giraSpeed * dt * 10), 0)
+		end
+	end
+end)
+
+--==================================================
+-- FUNÇÃO DE ARRASTAR
+--==================================================
+
+local function makeDraggable(object, dragArea)
+	local dragging = false
+	local dragStart
+	local startPos
+
+	dragArea.InputBegan:Connect(function(input)
+		if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+			dragging = true
+			dragStart = input.Position
+			startPos = object.Position
+			input.Changed:Connect(function()
+				if input.UserInputState == Enum.UserInputState.End then dragging = false end
+			end)
+		end
+	end)
+
+	UserInputService.InputChanged:Connect(function(input)
+		if dragging then
+			if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+				local delta = input.Position - dragStart
+				object.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+			end
+		end
+	end)
+end
+
+makeDraggable(openButton, openButton)
+makeDraggable(main, top)
+
+--==================================================
+-- ABRIR / FECHAR
+--==================================================
+
+local opened = false
+local animating = false
+
+local function openHub()
+	if animating or opened then return end
+	animating = true
+	opened = true
+	main.Visible = true
+	mainScale.Scale = 0.75
+
+	local animation = TweenService:Create(mainScale, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Scale = 1})
+	animation:Play()
+	animation.Completed:Connect(function() animating = false end)
+end
+
+local function closeHub()
+	if animating or not opened then return end
+	animating = true
+	opened = false
+
+	local animation = TweenService:Create(mainScale, TweenInfo.new(0.25, Enum.EasingStyle.Back, Enum.EasingDirection.In), {Scale = 0.75})
+	animation:Play()
+	animation.Completed:Connect(function() main.Visible = false; animating = false end)
+end
+
+openButton.MouseButton1Click:Connect(function()
+	if opened then closeHub() else openHub() end
+end)
+
+openButton.MouseButton1Down:Connect(function()
+	TweenService:Create(buttonScale, TweenInfo.new(0.1), {Scale = 0.88}):Play()
+end)
+
+openButton.MouseButton1Up:Connect(function()
+	TweenService:Create(buttonScale, TweenInfo.new(0.15, Enum.EasingStyle.Back), {Scale = 1}):Play()
+end)
+
+print("DV HUB carregado com sucesso!")
