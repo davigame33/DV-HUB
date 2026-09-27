@@ -1,16 +1,16 @@
 --// DV HUB
---// LocalScript dentro de StarterGui
+--// LocalScript / Executor
 
 -- Executa os loadstrings automaticamente de forma segura
 task.spawn(function()
 	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/Visual-/2aaa10c8b028e5b0f407e1dd2a3d5b85c41b5bf5/Visual"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/aa34cbfe3bc5a120a88d04e21e69d655ea18d890/saci"))()
 	end)
 end)
 
 task.spawn(function()
 	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/aa34cbfe3bc5a120a88d04e21e69d655ea18d890/saci"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/f3d38ca1787c8ae961aa513017baaa40f2512b47/saci"))()
 	end)
 end)
 
@@ -35,7 +35,25 @@ local DARK3 = Color3.fromRGB(45, 45, 50)
 local WHITE = Color3.fromRGB(245, 245, 245)
 
 --==================================================
--- GUI (Com proteção contra reset)
+-- VARIÁVEIS DE CONTROLE E ESTADO
+--==================================================
+
+local linhaEnabled = false
+local hologramEnabled = false
+local giraEnabled = false
+local giraSpeed = 50
+
+local tracer = nil
+pcall(function()
+	tracer = Drawing.new("Line")
+	tracer.Visible = false
+	tracer.Color = RED
+	tracer.Thickness = 3
+	tracer.Transparency = 1
+end)
+
+--==================================================
+-- GUI (Padrão no PlayerGui, sem proteção)
 --==================================================
 
 local gui
@@ -53,7 +71,7 @@ end
 
 createGui()
 
-player.CharacterAdded:Connect(function(newChar)
+player.CharacterAdded:Connect(function()
 	task.wait(0.2)
 	if not player.PlayerGui:FindFirstChild("DV_HUB") then
 		createGui()
@@ -148,10 +166,10 @@ avatarStroke.Color = RED
 avatarStroke.Thickness = 2.5
 avatarStroke.Parent = avatar
 
-local success, image = pcall(function()
+local successImg, image = pcall(function()
 	return Players:GetUserThumbnailAsync(player.UserId, Enum.ThumbnailType.HeadShot, Enum.ThumbnailSize.Size150x150)
 end)
-if success then avatar.Image = image end
+if successImg and image then avatar.Image = image end
 
 -- Título
 local title = Instance.new("TextLabel")
@@ -352,24 +370,6 @@ local function createSlider(name, min, max, initial, layoutOrder, callback)
 
 	return row
 end
-
---==================================================
--- VARIÁVEIS DE CONTROLE
---==================================================
-
-local linhaEnabled = false
-local hologramEnabled = false
-local giraEnabled = false
-local giraSpeed = 50
-
-local tracer = nil
-pcall(function()
-	tracer = Drawing.new("Line")
-	tracer.Visible = false
-	tracer.Color = RED
-	tracer.Thickness = 3
-	tracer.Transparency = 1
-end)
 
 local function getClosestPlayerHead()
 	local closestHead = nil
@@ -579,4 +579,4 @@ openButton.MouseButton1Up:Connect(function()
 	TweenService:Create(buttonScale, TweenInfo.new(0.15, Enum.EasingStyle.Back), {Scale = 1}):Play()
 end)
 
-print("DV HUB carregado com sucesso!")
+print("DV HUB carregado no PlayerGui com sucesso!")
