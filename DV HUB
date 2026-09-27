@@ -4,7 +4,7 @@
 -- Executa os loadstrings automaticamente de forma segura
 task.spawn(function()
 	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/Visual-/2aaa10c8b028e5b0f407e1dd2a3d5b85c41b5bf5/Visual"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/aa34cbfe3bc5a120a88d04e21e69d655ea18d890/saci"))()
 	end)
 end)
 
