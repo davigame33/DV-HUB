@@ -4,13 +4,19 @@
 -- Executa os loadstrings automaticamente de forma segura
 task.spawn(function()
 	pcall(function()
-		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/aa34cbfe3bc5a120a88d04e21e69d655ea18d890/saci"))()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/Visual-/2aaa10c8b028e5b0f407e1dd2a3d5b85c41b5bf5/Visual"))()
 	end)
 end)
 
 task.spawn(function()
 	pcall(function()
 		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/saci/f3d38ca1787c8ae961aa513017baaa40f2512b47/saci"))()
+	end)
+end)
+
+task.spawn(function()
+	pcall(function()
+		loadstring(game:HttpGet("https://raw.githubusercontent.com/davigame33/Mod-roupa-/47c9674b98de7b1f7d3fb8903f295d358062c579/Mod%20roupa"))()
 	end)
 end)
 
@@ -53,7 +59,7 @@ pcall(function()
 end)
 
 --==================================================
--- GUI (Padrão no PlayerGui, sem proteção)
+-- GUI (Padrão no PlayerGui)
 --==================================================
 
 local gui
@@ -579,4 +585,4 @@ openButton.MouseButton1Up:Connect(function()
 	TweenService:Create(buttonScale, TweenInfo.new(0.15, Enum.EasingStyle.Back), {Scale = 1}):Play()
 end)
 
-print("DV HUB carregado no PlayerGui com sucesso!")
+print("DV HUB carregado com sucesso!")
